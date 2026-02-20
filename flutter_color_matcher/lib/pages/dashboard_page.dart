@@ -346,9 +346,9 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                       _NavIcon(icon: Icons.grid_view, label: 'Home', isSelected: true),
+                       const _NavIcon(icon: Icons.grid_view, label: 'Home', isSelected: true),
                        const SizedBox(width: 32),
-                       _NavIcon(icon: Icons.bookmark, label: 'Library', isSelected: false),
+                       const _NavIcon(icon: Icons.bookmark, label: 'Library', isSelected: false),
                        const SizedBox(width: 32),
                        _NavIcon(
                          icon: Icons.person,

@@ -218,9 +218,9 @@ class _ProfilePageState extends State<ProfilePage> {
             onTap: () => context.go('/dashboard'),
           ),
           const SizedBox(width: 24),
-          _NavIcon(icon: Icons.bookmark, label: 'Library', isSelected: false),
+          const _NavIcon(icon: Icons.bookmark, label: 'Library', isSelected: false),
           const SizedBox(width: 24),
-          _NavIcon(icon: Icons.person, label: 'Profile', isSelected: true),
+          const _NavIcon(icon: Icons.person, label: 'Profile', isSelected: true),
         ],
       ),
     );

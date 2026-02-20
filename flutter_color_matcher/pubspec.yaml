@@ -24,9 +24,20 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/swatchbook-solid.png"
+  windows:
+    generate: true
+    image_path: "assets/swatchbook-solid.png"
+    icon_size: 48
 
 flutter:
   uses-material-design: true
   assets:
     - .env
     - assets/pantoneDb.json
+    - assets/swatchbook-solid.png
