@@ -136,7 +136,9 @@ class _ScannerPageState extends State<ScannerPage> {
     final closestMatch = _findClosestPantone(hex);
 
     final String colorHex = (closestMatch['hex'] as String? ?? hex).replaceAll('#', '');
-    context.push('/color/$colorHex');
+    final String pantoneName = closestMatch['pantone'] as String? ?? 'Custom Color';
+
+    context.go('/dashboard', extra: {"color": colorHex, "pantone": pantoneName});
   }
 
   dynamic _findClosestPantone(String hex) {

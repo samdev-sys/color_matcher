@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
 
 // Router Configuration
 final GoRouter _router = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/dashboard',
   redirect: (context, state) async {
     // Basic Auth Check
     final prefs = await SharedPreferences.getInstance();
@@ -66,7 +66,12 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
       path: '/dashboard',
-      builder: (context, state) => const DashboardPage(),
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        final colorHex = extra?['color'] as String?;
+        final pantoneName = extra?['pantone'] as String?;
+        return DashboardPage(colorHex: colorHex, pantoneName: pantoneName);
+      },
     ),
     GoRoute(
       path: '/scanner',
