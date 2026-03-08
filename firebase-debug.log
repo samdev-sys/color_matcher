@@ -1,0 +1,28 @@
+[debug] [2026-02-20T12:47:34.540Z] ----------------------------------------------------------------------
+[debug] [2026-02-20T12:47:34.549Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /nix/store/gm9mcvzb17vv8cla08khrg29vxn3sq4r-firebase-tools-15.1.0/lib/node_modules/firebase-tools/lib/bin/firebase.js init hosting
+[debug] [2026-02-20T12:47:34.553Z] CLI Version:   15.1.0
+[debug] [2026-02-20T12:47:34.553Z] Platform:      linux
+[debug] [2026-02-20T12:47:34.553Z] Node Version:  v20.19.1
+[debug] [2026-02-20T12:47:34.556Z] Time:          Fri Feb 20 2026 12:47:34 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-02-20T12:47:34.556Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-02-20T12:47:38.769Z] No OAuth tokens found
+[debug] [2026-02-20T12:47:38.771Z] No OAuth tokens found
+[error] Failed to fetch Firebase Project from current Studio Workspace: Unable to refresh auth: not yet authenticated.
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /home/user/color_matcher
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] 
