@@ -1,43 +1,49 @@
-# Flutter Color Matcher App
+# Color Matcher Pro - Flutter Edition
 
-This is a Flutter port of the Color Matcher Pro web application.
+Una aplicación móvil avanzada desarrollada en Flutter para la captura, análisis y gestión de colores utilizando Inteligencia Artificial (Gemini 1.5 Flash).
 
-## Prerequisites
+## 🚀 Registro de Modificaciones Recientes
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) installed.
-- An Android or iOS device/emulator.
-- A Gemini API Key from Google AI Studio.
+### 1. Arquitectura y Servicios Base
+- **GeminiService**: Integración con el modelo `gemini-1.5-flash` para análisis profundo de color.
+- **HistoryService**: Sistema de persistencia local con `SharedPreferences` para el historial de escaneos.
+- **LoggerService**: Sistema de registro de eventos para depuración y monitoreo.
+- **Modelos de Datos**: Implementación de clases `ColorData`, `RGB`, `CMYK` y `HarmonyColor` con soporte para serialización JSON.
 
-## Setup
+### 2. Mejoras de Estabilidad y Red (Última Sesión)
+- **Configuración de Permisos**: Se añadieron permisos de `INTERNET` y `CAMERA` en el `AndroidManifest.xml` para asegurar la conectividad y funcionalidad del hardware.
+- **Tests de Estabilidad**: Creación de `test/stability_test.dart` para verificar automáticamente la carga de configuraciones y la inicialización de servicios críticos.
+- **Gestión de Entorno**: Actualización del sistema de claves API mediante `.env` y corrección de errores de carga.
 
-1. **Create a new Flutter project** (if you haven't already initialized one with these files):
-   If you are just copying these files into a new project:
-   ```bash
-   flutter create color_matcher_pro
-   ```
-   Then replace the `lib` folder and `pubspec.yaml` with the provided files.
+### 3. Interfaz y Experiencia de Usuario (UI/UX)
+- **ScannerPage**: Interfaz de cámara en tiempo real con detección de color central y búsqueda de coincidencia Pantone más cercana.
+- **ColorDetailPage**: Visualización mejorada con:
+    - Análisis de **Psicología del Color**.
+    - **Consejos de Diseño** profesionales generados por IA.
+    - Paletas armoniosas dinámicas.
+- **Dashboard**: Vista principal con estadísticas de colores escaneados y acceso rápido al historial.
 
-2. **Install Dependencies**:
+---
+
+## 🛠️ Requisitos e Instalación
+
+1. **Flutter SDK**: Versión `3.1.0` o superior.
+2. **Dependencias**:
    ```bash
    flutter pub get
    ```
-
-3. **Environment Variables**:
-   Create a `.env` file in the root of the project (next to `pubspec.yaml`) and add your API key:
-   ```
-   GEMINI_API_KEY=your_api_key_here
-   ```
-
-   *Note: You may need to add `.env` to your `pubspec.yaml` assets manually if it's not picked up, although it is configured in the provided pubspec.*
-
-4. **Run the App**:
-   ```bash
-   flutter run
+3. **Configuración de API Key**:
+   Crea un archivo `.env` en la raíz del proyecto:
+   ```env
+   GEMINI_API_KEY=tu_clave_aqui
    ```
 
-## Features
+## 🧪 Pruebas
+Para ejecutar los tests de estabilidad:
+```bash
+flutter test test/stability_test.dart
+```
 
-- **Login**: (Simulated) authentication flow.
-- **Dashboard**: View recent palettes and stats.
-- **Scanner**: Use the device camera to "capture" colors (simulated capture logic).
-- **Color Detail**: Detailed analysis of colors using Gemini AI (Psychology, Pantone matching, Harmonious palettes).
+---
+**Estado del Proyecto:** Estable / Mejorado con IA Pro
+**Última actualización:** 23 de Mayo de 2024

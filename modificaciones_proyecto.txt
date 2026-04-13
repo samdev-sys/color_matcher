@@ -27,8 +27,16 @@ REGISTRO DE MODIFICACIONES - COLOR MATCHER PRO (FLUTTER)
 - Diseño de `ColorDetailPage`: Visualización detallada del color con scroll progresivo y botones flotantes.
 - Aplicación de Tema Global: Definición de `AppColors` y estilos personalizados en `theme.dart`.
 
-4. MEJORAS RECIENTES (BASADAS EN ANÁLISIS DE IA)
+4. MEJORAS RECIENTES (SESIÓN ACTUAL)
 -------------------------------------------------
+- CONFIGURACIÓN DE RED Y PERMISOS:
+    * Se añadió el permiso `android.permission.INTERNET` en `AndroidManifest.xml` para habilitar la conexión con la API de Gemini.
+    * Se añadió el permiso `android.permission.CAMERA` para asegurar el funcionamiento del escáner en dispositivos físicos.
+
+- CALIDAD Y ESTABILIDAD:
+    * Creación de `test/stability_test.dart`: Suite de pruebas automatizadas para verificar la carga de variables de entorno, la inicialización del servicio Gemini y el renderizado básico de la UI.
+    * Verificación y actualización de `GEMINI_API_KEY` en el archivo `.env`.
+
 - MODELO DE DATOS (`models.dart`):
     * Se agregaron campos `psychology` (String) y `usageTips` (List<String>) al objeto `ColorData`.
     * Actualización de serialización JSON para soportar nuevos metadatos.
@@ -40,11 +48,10 @@ REGISTRO DE MODIFICACIONES - COLOR MATCHER PRO (FLUTTER)
 - PÁGINA DE DETALLES (`color_detail_page.dart`):
     * Nueva Sección "Color Psychology": Bloque visual con icono para explicar el impacto emocional del color.
     * Nueva Sección "Usage Tips": Lista de recomendaciones de diseño basadas en el análisis de la IA.
-    * Adaptabilidad: Se mejoró la renderización condicional para manejar datos nulos o cargas pendientes.
 
 - PERSISTENCIA:
     * Se aseguró que la psicología y los consejos se guarden en el historial local para consulta offline.
 
 ---------------------------------
-Última actualización: 22 de Mayo de 2024 (Basado en la sesión actual)
-Estado: Funcional / Mejorado con IA Pro
+Última actualización: 23 de Mayo de 2024
+Estado: Estable / Conexión API Corregida / Tests de Estabilidad Implementados

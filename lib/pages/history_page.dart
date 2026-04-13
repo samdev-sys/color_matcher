@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../models/models.dart';
 import '../services/history_service.dart';
 import '../theme.dart';
@@ -24,33 +25,50 @@ class _HistoryPageState extends State<HistoryPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear History'),
-        content: const Text('Are you sure you want to delete all saved colors?'),
+        backgroundColor: AppColors.backgroundCard,
+        title: const Text('Clear History', style: TextStyle(color: Colors.white)),
+        content: const Text('Are you sure you want to delete all saved colors?', style: TextStyle(color: Colors.white70)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Clear', style: TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Clear All', style: TextStyle(color: Colors.red))),
         ],
       ),
     );
 
     if (confirmed == true) {
       await _historyService.clearHistory();
-      setState(() {
-        _historyFuture = _historyService.getHistory(); // Refresh the list
-      });
+      _refreshHistory();
     }
+  }
+
+  Future<void> _deleteItem(String hex) async {
+    await _historyService.removeColorFromHistory(hex);
+    _refreshHistory();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Color removed from history'), duration: Duration(seconds: 1)),
+    );
+  }
+
+  void _refreshHistory() {
+    setState(() {
+      _historyFuture = _historyService.getHistory();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundDark,
       appBar: AppBar(
-        title: const Text('Color History'),
+        backgroundColor: AppColors.backgroundDark,
+        elevation: 0,
+        title: const Text('Color History', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_sweep),
+            icon: const Icon(Icons.delete_sweep_outlined, color: Colors.white70),
             onPressed: _clearHistory,
-            tooltip: 'Clear History',
+            tooltip: 'Clear All',
           ),
         ],
       ),
@@ -58,28 +76,27 @@ class _HistoryPageState extends State<HistoryPage> {
         future: _historyFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.white)));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, size: 60, color: Colors.grey),
+                  Icon(Icons.history, size: 80, color: Colors.white10),
                   SizedBox(height: 16),
-                  Text('No colors saved yet.', style: TextStyle(fontSize: 18, color: Colors.grey))
+                  Text('Your history is empty.', style: TextStyle(fontSize: 18, color: Colors.white38))
                 ],
               ),
             );
           } else {
             final history = snapshot.data!;
             return ListView.builder(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               itemCount: history.length,
               itemBuilder: (context, index) {
                 final colorData = history[index];
-                // Safe parsing of hex to color
                 Color displayColor = Colors.grey;
                 try {
                   final hexStr = colorData.hex.replaceAll('#', '');
@@ -87,40 +104,91 @@ class _HistoryPageState extends State<HistoryPage> {
                     displayColor = Color(int.parse('FF$hexStr', radix: 16));
                   }
                 } catch (e) {
-                  print('Error parsing color: $e');
+                  debugPrint('Error parsing color: $e');
                 }
 
-                return Card(
-                  elevation: 2,
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(width: 40, height: 40, color: displayColor),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(colorData.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                  Text(colorData.hex, style: const TextStyle(color: Colors.grey))
-                                ],
+                return Dismissible(
+                  key: Key(colorData.hex + index.toString()),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  onDismissed: (_) => _deleteItem(colorData.hex),
+                  child: GestureDetector(
+                    onTap: () => context.push('/color/${colorData.hex.replaceAll('#', '')}'),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.backgroundCard,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white10),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 70,
+                                color: displayColor,
+                                child: Center(
+                                  child: Icon(
+                                    Icons.colorize, 
+                                    color: displayColor.computeLuminance() > 0.5 ? Colors.black38 : Colors.white38
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              colorData.name, 
+                                              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          Text(
+                                            colorData.hex.toUpperCase(), 
+                                            style: const TextStyle(color: Colors.white38, fontSize: 12, fontFamily: 'monospace'),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Pantone: ${colorData.pantone}', 
+                                        style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.w500),
+                                      ),
+                                      if (colorData.psychology != null) ...[
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          colorData.psychology!,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(color: Colors.white54, fontSize: 11, fontStyle: FontStyle.italic),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 16),
-                        const Divider(),
-                        const SizedBox(height: 10),
-                        _buildInfoRow('Pantone', colorData.pantone),
-                        _buildInfoRow('RGB', colorData.rgb.toString()),
-                        _buildInfoRow('CMYK', colorData.cmyk.toString()),
-                      ],
+                      ),
                     ),
                   ),
                 );
@@ -128,19 +196,6 @@ class _HistoryPageState extends State<HistoryPage> {
             );
           }
         },
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-          Text(value, style: const TextStyle(fontSize: 16))
-        ],
       ),
     );
   }

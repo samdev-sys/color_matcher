@@ -18,7 +18,6 @@ class _ColorDetailPageState extends State<ColorDetailPage> {
   final HistoryService _historyService = HistoryService();
   bool _loading = true;
   ColorData? _analysis;
-  List<HarmonyColor> _harmonies = [];
   late Color _displayColor;
 
   @override
@@ -38,17 +37,14 @@ class _ColorDetailPageState extends State<ColorDetailPage> {
 
   Future<void> _fetchData() async {
     setState(() => _loading = true);
-    final hexWithHash = widget.hex.startsWith('#') ? widget.hex : '#${widget.hex}';
-    
-    final results = await Future.wait([
-      _geminiService.getColorAnalysis(hexWithHash),
-      _geminiService.generateHarmoniousPalette(hexWithHash),
-    ]);
+    final hexWithHash =
+        widget.hex.startsWith('#') ? widget.hex : '#${widget.hex}';
+
+    final analysis = await _geminiService.getColorAnalysis(hexWithHash);
 
     if (mounted) {
       setState(() {
-        _analysis = results[0] as ColorData?;
-        _harmonies = results[1] as List<HarmonyColor>;
+        _analysis = analysis;
         _loading = false;
       });
     }
@@ -59,7 +55,7 @@ class _ColorDetailPageState extends State<ColorDetailPage> {
       _historyService.addColorToHistory(_analysis!);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Color saved to history!'),
+          content: Text('Color saved!'),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -75,13 +71,13 @@ class _ColorDetailPageState extends State<ColorDetailPage> {
       backgroundColor: AppColors.backgroundDark,
       body: CustomScrollView(
         slivers: [
-          // Collapsible Header with flexible height
           SliverAppBar(
             expandedHeight: MediaQuery.of(context).size.height * 0.45,
             pinned: true,
             leading: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: _GlassButton(icon: Icons.arrow_back_ios_new, onTap: () => context.pop()),
+              child: _GlassButton(
+                  icon: Icons.arrow_back_ios_new, onTap: () => context.pop()),
             ),
             actions: [
               _GlassButton(icon: Icons.favorite_border, onTap: () {}),
@@ -93,195 +89,129 @@ class _ColorDetailPageState extends State<ColorDetailPage> {
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 color: _displayColor,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('COLOR PALETTE PRO', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 3, color: Colors.black54)),
+                    const Text('COLOR MATCHER PRO',
+                        style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 3,
+                            color: Colors.black54)),
                     const SizedBox(height: 8),
                     FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text(
-                        _analysis?.name ?? 'Loading...',
-                        style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.black87)
-                      ),
+                      child: Text(_analysis?.name ?? 'Loading...',
+                          style: const TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87)),
                     ),
                     const SizedBox(height: 8),
-                    Text('#${widget.hex.toUpperCase()}', style: const TextStyle(fontSize: 18, fontFamily: 'monospace', color: Colors.black45)),
+                    Text('#${widget.hex.toUpperCase()}',
+                        style: const TextStyle(
+                            fontSize: 18,
+                            fontFamily: 'monospace',
+                            color: Colors.black45)),
                   ],
                 ),
               ),
             ),
           ),
-
-          // Detailed Content
           SliverToBoxAdapter(
             child: Container(
               padding: EdgeInsets.symmetric(
-                horizontal: isTablet ? screenWidth * 0.1 : 24, 
-                vertical: 32
-              ),
+                  horizontal: isTablet ? screenWidth * 0.1 : 24, vertical: 32),
               decoration: const BoxDecoration(
                 color: AppColors.backgroundDark,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
               ),
-              child: _loading 
-                  ? const Center(child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 100),
-                    child: CircularProgressIndicator(),
-                  )) 
+              child: _loading
+                  ? const Center(
+                      child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 100),
+                      child: CircularProgressIndicator(),
+                    ))
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Main Info Card
                         _buildResponsiveCard(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const Text('PANTONE MATCHING SYSTEM', style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
+                                        const Text('PANTONE',
+                                            style: TextStyle(
+                                                color: AppColors.primary,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 4),
-                                        Text(_analysis?.pantone ?? 'N/A', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                                        Text(_analysis?.pantone ?? 'N/A',
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold)),
                                       ],
                                     ),
                                   ),
-                                  const Icon(Icons.verified, color: Colors.white24),
+                                  const Icon(Icons.verified,
+                                      color: Colors.white24),
                                 ],
                               ),
                               const Divider(color: Colors.white10, height: 32),
                               Row(
                                 children: [
-                                  Expanded(child: _InfoItem('HEX CODE', '#${widget.hex.toUpperCase()}')),
-                                  Expanded(child: _InfoItem('COLOR NAME', _analysis?.name ?? 'N/A')),
+                                  Expanded(
+                                      child: _InfoItem('HEX',
+                                          '#${widget.hex.toUpperCase()}')),
+                                  Expanded(
+                                      child: _InfoItem(
+                                          'NOMBRE', _analysis?.name ?? 'N/A')),
                                 ],
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(height: 24),
-
-                        // Psychology section
-                        if (_analysis?.psychology != null) ...[
-                          _buildResponsiveCard(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Row(
-                                  children: [
-                                    Icon(Icons.psychology, color: AppColors.primary),
-                                    SizedBox(width: 12),
-                                    Text('Color Psychology', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  _analysis!.psychology!,
-                                  style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                        ],
-
-                        // Color Spaces
                         _buildResponsiveCard(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Row(
                                 children: [
-                                  Icon(Icons.format_paint, color: AppColors.primary),
+                                  Icon(Icons.format_paint,
+                                      color: AppColors.primary),
                                   SizedBox(width: 12),
-                                  Text('Color Spaces', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                                  Text('Valores',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold)),
                                 ],
                               ),
                               const SizedBox(height: 24),
                               _DetailRow(
-                                label: 'RGB Values', 
-                                value: _analysis?.rgb.toString() ?? '...',
-                              ),
+                                  label: 'RGB',
+                                  value: _analysis?.rgb.toString() ?? '...'),
                               const SizedBox(height: 16),
                               _DetailRow(
-                                label: 'CMYK Values', 
-                                value: _analysis?.cmyk.toString() ?? '...',
-                              ),
+                                  label: 'CMYK',
+                                  value: _analysis?.cmyk.toString() ?? '...'),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 24),
-
-                        // Usage Tips
-                        if (_analysis?.usageTips != null && _analysis!.usageTips!.isNotEmpty) ...[
-                          const Text('Usage Tips', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 16),
-                          ...(_analysis!.usageTips!.map((tip) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(Icons.check_circle_outline, color: AppColors.primary, size: 20),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(tip, style: const TextStyle(color: Colors.white70, fontSize: 14)),
-                                ),
-                              ],
-                            ),
-                          ))),
-                          const SizedBox(height: 24),
-                        ],
-                         
-                         // Harmonies
-                         const Text('Harmonious Palette', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                         const SizedBox(height: 16),
-                         GridView.builder(
-                           shrinkWrap: true,
-                           physics: const NeverScrollableScrollPhysics(),
-                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                             crossAxisCount: isTablet ? 3 : 2,
-                             crossAxisSpacing: 16,
-                             mainAxisSpacing: 16,
-                             childAspectRatio: 1.2,
-                           ),
-                           itemCount: _harmonies.length,
-                           itemBuilder: (context, index) {
-                             final harmony = _harmonies[index];
-                             return GestureDetector(
-                               onTap: () => context.push('/color/${harmony.hex.replaceAll('#', '')}'),
-                               child: Container(
-                                 padding: const EdgeInsets.all(12),
-                                 decoration: BoxDecoration(
-                                   color: Colors.white.withOpacity(0.05),
-                                   borderRadius: BorderRadius.circular(16),
-                                   border: Border.all(color: Colors.white10),
-                                 ),
-                                 child: Column(
-                                   children: [
-                                     Expanded(
-                                       child: Container(
-                                         decoration: BoxDecoration(
-                                           color: _parseColor(harmony.hex),
-                                           borderRadius: BorderRadius.circular(12),
-                                         ),
-                                       ),
-                                     ),
-                                     const SizedBox(height: 8),
-                                     Text(harmony.type, style: const TextStyle(color: Colors.white30, fontSize: 9, fontWeight: FontWeight.bold, overflow: TextOverflow.ellipsis)),
-                                      Text(harmony.hex.toUpperCase(), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                                   ],
-                                 ),
-                               ),
-                             );
-                           },
-                         ),
-                         const SizedBox(height: 100), // Space for bottom actions
+                        const SizedBox(height: 100),
                       ],
                     ),
             ),
@@ -289,7 +219,8 @@ class _ColorDetailPageState extends State<ColorDetailPage> {
         ],
       ),
       bottomSheet: Container(
-        padding: EdgeInsets.fromLTRB(24, 16, 24, 16 + MediaQuery.of(context).padding.bottom),
+        padding: EdgeInsets.fromLTRB(
+            24, 16, 24, 16 + MediaQuery.of(context).padding.bottom),
         color: AppColors.backgroundDark.withOpacity(0.95),
         child: Row(
           children: [
@@ -299,7 +230,8 @@ class _ColorDetailPageState extends State<ColorDetailPage> {
                   foregroundColor: Colors.white,
                   side: const BorderSide(color: Colors.white24),
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
                 ),
                 onPressed: () {},
                 child: const Row(
@@ -307,7 +239,7 @@ class _ColorDetailPageState extends State<ColorDetailPage> {
                   children: [
                     Icon(Icons.share, size: 18),
                     SizedBox(width: 8),
-                    Text('Share'),
+                    Text('Compartir'),
                   ],
                 ),
               ),
@@ -319,15 +251,16 @@ class _ColorDetailPageState extends State<ColorDetailPage> {
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
                 ),
-                 onPressed: _saveColor,
+                onPressed: _saveColor,
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.bookmark_add, size: 18),
                     SizedBox(width: 8),
-                    Text('Save'),
+                    Text('Guardar'),
                   ],
                 ),
               ),
@@ -383,9 +316,17 @@ class _InfoItem extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold)),
+        Text(label,
+            style: const TextStyle(
+                color: Colors.white38,
+                fontSize: 9,
+                fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        Text(value,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -403,10 +344,17 @@ class _DetailRow extends StatelessWidget {
       children: [
         SizedBox(
           width: 80,
-          child: Text(label, style: const TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold, height: 1.5)),
+          child: Text(label,
+              style: const TextStyle(
+                  color: Colors.white38,
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  height: 1.5)),
         ),
         Expanded(
-          child: Text(value, style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.5)),
+          child: Text(value,
+              style: const TextStyle(
+                  color: Colors.white70, fontSize: 14, height: 1.5)),
         ),
       ],
     );

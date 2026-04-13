@@ -9,12 +9,24 @@ class HistoryService {
     final prefs = await SharedPreferences.getInstance();
     final history = await getHistory();
     
-    // Avoid duplicates
-    if (!history.any((c) => c.hex == color.hex)) {
-      history.add(color);
-      final String encodedData = jsonEncode(history.map((c) => c.toJson()).toList());
-      await prefs.setString(_historyKey, encodedData);
-    }
+    // Avoid duplicates by hex
+    history.removeWhere((c) => c.hex.toUpperCase() == color.hex.toUpperCase());
+    
+    // Add to the beginning (most recent first)
+    history.insert(0, color);
+    
+    final String encodedData = jsonEncode(history.map((c) => c.toJson()).toList());
+    await prefs.setString(_historyKey, encodedData);
+  }
+
+  Future<void> removeColorFromHistory(String hex) async {
+    final prefs = await SharedPreferences.getInstance();
+    final history = await getHistory();
+    
+    history.removeWhere((c) => c.hex.toUpperCase() == hex.toUpperCase());
+    
+    final String encodedData = jsonEncode(history.map((c) => c.toJson()).toList());
+    await prefs.setString(_historyKey, encodedData);
   }
 
   Future<List<ColorData>> getHistory() async {
@@ -22,8 +34,13 @@ class HistoryService {
     final String? encodedData = prefs.getString(_historyKey);
     
     if (encodedData != null) {
-      final List<dynamic> decodedData = jsonDecode(encodedData);
-      return decodedData.map((item) => ColorData.fromJson(item)).toList();
+      try {
+        final List<dynamic> decodedData = jsonDecode(encodedData);
+        return decodedData.map((item) => ColorData.fromJson(item)).toList();
+      } catch (e) {
+        print('Error decoding history: $e');
+        return [];
+      }
     }
     
     return [];

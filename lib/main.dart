@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/logger_service.dart';
@@ -18,17 +17,8 @@ import 'pages/history_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  await LoggerService.init();
 
-  // Load environment variables
-  // Ensure you add .env to pubspec assets
-  try {
-    await dotenv.load(fileName: ".env");
-    LoggerService.logger.i(".env file loaded successfully.");
-  } catch (e) {
-    LoggerService.logger.w("Warning: .env file not found. Gemini API features may not work.");
-  }
+  await LoggerService.init();
 
   runApp(const MyApp());
 }
@@ -54,19 +44,21 @@ final GoRouter _router = GoRouter(
     // Basic Auth Check
     final prefs = await SharedPreferences.getInstance();
     final isAuth = prefs.getBool(AppConfig.authKey) ?? false;
-    
+
     final location = state.matchedLocation;
     final isAuthPath = location == '/' || location == '/register';
-    
+
     if (!isAuth && !isAuthPath) {
-      LoggerService.logger.i("User not authenticated. Redirecting to login page.");
+      LoggerService.logger
+          .i("User not authenticated. Redirecting to login page.");
       return '/';
     }
     if (isAuth && isAuthPath) {
-      LoggerService.logger.i("User already authenticated. Redirecting to dashboard.");
+      LoggerService.logger
+          .i("User already authenticated. Redirecting to dashboard.");
       return '/dashboard';
     }
-    
+
     return null;
   },
   routes: [
@@ -99,7 +91,7 @@ final GoRouter _router = GoRouter(
       path: '/profile/edit',
       builder: (context, state) => const EditProfilePage(),
     ),
-     GoRoute(
+    GoRoute(
       path: '/profile/history',
       builder: (context, state) => const HistoryPage(),
     ),
